@@ -35,6 +35,7 @@
         <module>common-system</module>
         <module>checksum</module>
         <module>klv</module>
+        <module>log-sanitizer</module>
         <module>mpeg-transport-stream</module>
         <module>geospatial</module>
         <module>tlmatcher</module>

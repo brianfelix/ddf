@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.shiro.subject.Subject;
 import org.codice.ddf.configuration.SystemBaseUrl;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,11 +77,17 @@ public class IdpLogoutActionProvider implements ActionProvider {
       logoutUrl = new URL(logoutUrlString);
 
     } catch (MalformedURLException e) {
-      LOGGER.info("Unable to resolve URL: {}", logoutUrlString);
+      LOGGER.info("Unable to resolve URL: {}", LogSanitizer.cleanAndEncode(logoutUrlString));
     } catch (ClassCastException e) {
-      LOGGER.debug("Unable to cast parameter to Map<String, Object>, {}", subjectMap, e);
+      LOGGER.debug(
+          "Unable to cast parameter to Map<String, Object>, {}",
+          LogSanitizer.cleanAndEncode(subjectMap.toString()),
+          e);
     } catch (UnsupportedEncodingException e) {
-      LOGGER.debug("Unable to encode the encrypted timestamp.", subjectMap, e);
+      LOGGER.debug(
+          "Unable to encode the encrypted timestamp.",
+          LogSanitizer.cleanAndEncode(subjectMap.toString()),
+          e);
     }
     return new ActionImpl(ID, TITLE, DESCRIPTION, logoutUrl);
   }

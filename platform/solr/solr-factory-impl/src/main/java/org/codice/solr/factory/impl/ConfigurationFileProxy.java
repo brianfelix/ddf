@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.codice.ddf.configuration.AbsolutePathResolver;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,10 +73,17 @@ public class ConfigurationFileProxy {
 
     if (isNotBlank(storedDataDirectoryPath)) {
       this.dataDirectory = new File(storedDataDirectoryPath);
-      LOGGER.debug("1. dataDirectory set to [{}]", storedDataDirectoryPath);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "1. dataDirectory set to [{}]", LogSanitizer.cleanAndEncode(storedDataDirectoryPath));
+      }
     } else {
       this.dataDirectory = new File(DEFAULT_SOLR_DATA_PARENT_DIR);
-      LOGGER.debug("2. dataDirectory set to [{}]", this.dataDirectory.getAbsolutePath());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "2. dataDirectory set to [{}]",
+            LogSanitizer.cleanAndEncode(this.dataDirectory.getAbsolutePath()));
+      }
     }
   }
 

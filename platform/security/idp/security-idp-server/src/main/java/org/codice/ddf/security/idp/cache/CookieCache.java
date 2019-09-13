@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.cxf.ws.security.tokenstore.SecurityToken;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -143,8 +144,12 @@ public class CookieCache {
   public void removeSamlAssertion(String key) {
     DataWrapper dataWrapper = cache.getIfPresent(key);
     if (dataWrapper != null) {
-      LOGGER.debug(
-          "Expiring Saml assertion due to LogoutRequest\n[{}:{}]", key, dataWrapper.element);
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "Expiring Saml assertion due to LogoutRequest\n[{}:{}]",
+            LogSanitizer.cleanAndEncode(key),
+            LogSanitizer.cleanAndEncode(dataWrapper.element.toString()));
+      }
       synchronized (dataWrapper) {
         dataWrapper.element = null;
       }

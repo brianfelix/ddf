@@ -84,6 +84,7 @@ import org.codice.ddf.catalog.ui.metacard.EntityTooLargeException;
 import org.codice.ddf.catalog.ui.query.cql.CqlQueryResponse;
 import org.codice.ddf.catalog.ui.query.cql.CqlRequest;
 import org.codice.ddf.catalog.ui.transformer.TransformerDescriptors;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.codice.gsonsupport.GsonTypeAdapters.LongDoubleTypeAdapter;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.FactoryIteratorProvider;
@@ -813,8 +814,8 @@ public class EndpointUtil {
     if (LOGGER.isTraceEnabled()) {
       LOGGER.trace(
           "While collecting metacards into map, there were metacards found with a duplicate key.\nOld: {}\nNew: {}",
-          current,
-          incoming);
+          LogSanitizer.cleanAndEncode(current.toString()),
+          LogSanitizer.cleanAndEncode(incoming.toString()));
     }
     return current;
   }

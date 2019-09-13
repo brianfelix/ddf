@@ -124,6 +124,7 @@ import org.apache.wss4j.common.saml.builder.SAML2Constants;
 import org.apache.wss4j.common.util.DOM2Writer;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codice.ddf.configuration.SystemBaseUrl;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.codice.ddf.platform.util.StandardThreadFactoryBuilder;
 import org.codice.ddf.security.OcspService;
 import org.codice.ddf.security.common.HttpUtils;
@@ -296,7 +297,8 @@ public class IdpEndpoint implements Idp, SessionHandler {
     String cacheKey = cookieCache.getCacheKeyBySubjectName(subjectName, securityManager);
     if (cacheKey == null) {
       LOGGER.debug(
-          "No cache element found for subject name {}; skipping invalidation.", subjectName);
+          "No cache element found for subject name {}; skipping invalidation.",
+          LogSanitizer.cleanAndEncode(subjectName));
       return;
     }
 
@@ -832,9 +834,9 @@ public class IdpEndpoint implements Idp, SessionHandler {
       @Context HttpServletRequest request) {
     LOGGER.debug(
         "Processing login request: [ authMethod {} ], [ sigAlg {} ], [ relayState {} ]",
-        authMethod,
-        signatureAlgorithm,
-        relayState);
+        LogSanitizer.cleanAndEncode(authMethod),
+        LogSanitizer.cleanAndEncode(signatureAlgorithm),
+        LogSanitizer.cleanAndEncode(relayState));
     try {
       Binding binding;
       if (!request.isSecure()) {
@@ -885,7 +887,8 @@ public class IdpEndpoint implements Idp, SessionHandler {
               false,
               false,
               authnRequest.getSignature() != null || signature != null);
-      LOGGER.debug("Returning SAML Response for relayState: {}", relayState);
+      LOGGER.debug(
+          "Returning SAML Response for relayState: {}", LogSanitizer.cleanAndEncode(relayState));
       NewCookie newCookie = createCookie(request, encodedSaml);
       Response response =
           binding.creator().getSamlpResponse(relayState, authnRequest, encodedSaml, newCookie);
@@ -1043,7 +1046,10 @@ public class IdpEndpoint implements Idp, SessionHandler {
     Element samlToken = null;
     Cookie cookie = getCookie(request);
     if (cookie != null) {
-      LOGGER.debug("Retrieving cookie {}:{} from cache.", cookie.getValue(), cookie.getName());
+      LOGGER.debug(
+          "Retrieving cookie {}:{} from cache.",
+          LogSanitizer.cleanAndEncode(cookie.getValue()),
+          LogSanitizer.cleanAndEncode(cookie.getName()));
       String key = cookie.getValue();
       LOGGER.debug("Retrieving SAML Token from cookie.");
       samlToken = cookieCache.getSamlAssertion(key);
@@ -1054,7 +1060,10 @@ public class IdpEndpoint implements Idp, SessionHandler {
   private boolean hasValidCookie(HttpServletRequest request, boolean forceAuthn) {
     Cookie cookie = getCookie(request);
     if (cookie != null) {
-      LOGGER.debug("Retrieving cookie {}:{} from cache.", cookie.getValue(), cookie.getName());
+      LOGGER.debug(
+          "Retrieving cookie {}:{} from cache.",
+          LogSanitizer.cleanAndEncode(cookie.getValue()),
+          LogSanitizer.cleanAndEncode(cookie.getName()));
       String key = cookie.getValue();
       LOGGER.debug("Retrieving SAML Token from cookie.");
       Element samlToken = cookieCache.getSamlAssertion(key);

@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.shiro.util.ThreadContext;
+import org.codice.ddf.log.sanitizer.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,11 @@ public class ClientInfoFilter implements Filter {
     if (servletContext != null) {
       clientInfoMap.put(SERVLET_CONTEXT_PATH, servletContext.getContextPath());
     }
-    LOGGER.debug("Creating client info map with the following pairs, {}", clientInfoMap);
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(
+          "Creating client info map with the following pairs, {}",
+          LogSanitizer.cleanAndEncode(clientInfoMap.toString()));
+    }
     return clientInfoMap;
   }
 }

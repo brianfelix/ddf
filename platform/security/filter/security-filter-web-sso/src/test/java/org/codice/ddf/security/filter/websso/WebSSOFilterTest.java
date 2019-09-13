@@ -348,6 +348,24 @@ public class WebSSOFilterTest {
   }
 
   @Test
+  public void testDoFilterReturnsStatusCode400WhenXForwadedForHeaderInvalid()
+      throws IOException, AuthenticationException {
+    ContextPolicyManager policyManager = mock(ContextPolicyManager.class);
+    when(policyManager.isWhiteListed(any(String.class))).thenReturn(false);
+    WebSSOFilter filter = new WebSSOFilter();
+    filter.setContextPolicyManager(policyManager);
+    FilterChain filterChain = mock(FilterChain.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getHeader("X-FORWARDED-FOR")).thenReturn("192.168.0.1,INVALID_VALUE!");
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    filter.doFilter(request, response, filterChain);
+
+    verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    verify(response).flushBuffer();
+    verify(filterChain, never()).doFilter(request, response);
+  }
+
+  @Test
   public void testDoFilterReturnsGuestTokenWhenNoHandlersRegisteredAndGuestAccessEnabled()
       throws IOException, AuthenticationException {
     ContextPolicyManager policyManager = mock(ContextPolicyManager.class);

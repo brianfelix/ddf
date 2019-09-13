@@ -24,6 +24,7 @@ import ddf.security.http.SessionFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import javax.servlet.ServletRequest;
@@ -31,6 +32,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.codice.ddf.platform.filter.AuthenticationChallengeException;
 import org.codice.ddf.platform.filter.AuthenticationException;
 import org.codice.ddf.platform.filter.AuthenticationFailureException;
@@ -62,6 +64,8 @@ public class WebSSOFilter implements SecurityFilter {
   private ContextPolicyManager contextPolicyManager;
 
   private SessionFactory sessionFactory;
+
+  private InetAddressValidator inetAddressValidator = new InetAddressValidator();
 
   @Override
   public void init() {
@@ -140,8 +144,15 @@ public class WebSSOFilter implements SecurityFilter {
 
     if (ipAddress == null) {
       ipAddress = httpRequest.getRemoteAddr();
+    } else {
+      if (!Arrays.stream(ipAddress.replaceAll("\\s+", "").split(","))
+          .allMatch(ip -> inetAddressValidator.isValid(ip))) {
+        LOGGER.error(
+            "Invalid IP address found in X-FORWARDED-FOR header. Returning status code 400, Bad Request.");
+        returnSimpleResponse(HttpServletResponse.SC_BAD_REQUEST, httpResponse);
+        return;
+      }
     }
-
     if (contextPolicyManager.getSessionAccess()) {
       result = checkForPreviousResultOnSession(httpRequest, ipAddress);
     }
