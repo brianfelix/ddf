@@ -34,7 +34,11 @@
 
     <reference id="securityManager" interface="ddf.security.service.SecurityManager"/>
 
-    <bean id="logoutServlet" class="org.codice.ddf.security.servlet.logout.LocalLogoutServlet"/>
+    <bean id="logoutServlet" class="org.codice.ddf.security.servlet.logout.LocalLogoutServlet">
+        <cm:managed-properties persistent-id="org.codice.ddf.security.servlet.logout.LocalLogoutServlet"
+                               update-strategy="container-managed"/>
+        <property name="redirectUri" value=""/>
+    </bean>
 
     <service ref="logoutServlet" interface="javax.servlet.Servlet">
         <service-properties>

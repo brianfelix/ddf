@@ -17,6 +17,7 @@ import ddf.security.SecurityConstants;
 import ddf.security.common.SecurityTokenHolder;
 import ddf.security.common.audit.SecurityLogger;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -26,13 +27,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.logging.log4j.util.Strings;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
+import org.codice.ddf.configuration.SystemBaseUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LocalLogoutServlet extends HttpServlet {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalLogoutServlet.class);
+
+  private String redirectUri = "";
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,17 +46,29 @@ public class LocalLogoutServlet extends HttpServlet {
     response.setHeader("Cache-Control", "no-cache, no-store");
     response.setHeader("Pragma", "no-cache");
     response.setContentType("text/html");
-
-    invalidateSession(request, response);
-
-    boolean mustCloseBrowser = (checkForBasic(request) || checkForPki(request));
-    String message = String.format("{ \"mustCloseBrowser\": %b }", mustCloseBrowser);
-
     try {
+
+      invalidateSession(request, response);
+
+      boolean mustCloseBrowser = (checkForBasic(request) || checkForPki(request));
+      URIBuilder redirectUrlBuilder = null;
+      if (Strings.isNotBlank(SystemBaseUrl.INTERNAL.getBaseUrl())
+          && Strings.isNotBlank(redirectUri)) {
+        redirectUrlBuilder = new URIBuilder(SystemBaseUrl.INTERNAL.getBaseUrl() + redirectUri);
+      }
+      String message =
+          String.format(
+              "{ \"mustCloseBrowser\": %b, \"redirectUri\": \"%s\" }",
+              mustCloseBrowser,
+              redirectUrlBuilder == null ? "" : redirectUrlBuilder.build().toString());
+
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("application/json");
       response.getWriter().write(message);
       response.flushBuffer();
+
+    } catch (URISyntaxException e) {
+      LOGGER.debug("Invalid URI: ", e);
     } catch (IOException e) {
       LOGGER.warn("Unable to write response body", e);
     }
@@ -101,5 +119,9 @@ public class LocalLogoutServlet extends HttpServlet {
     cookie.setPath("/");
     cookie.setComment("EXPIRING COOKIE at " + System.currentTimeMillis());
     response.addCookie(cookie);
+  }
+
+  public void setRedirectUri(String redirectUri) {
+    this.redirectUri = redirectUri;
   }
 }
