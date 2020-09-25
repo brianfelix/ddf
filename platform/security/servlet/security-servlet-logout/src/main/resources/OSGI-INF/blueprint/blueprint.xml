@@ -34,13 +34,15 @@
 
     <reference id="securityManager" interface="ddf.security.service.SecurityManager"/>
 
-    <bean id="logoutServlet" class="org.codice.ddf.security.servlet.logout.LocalLogoutServlet"/>
 
-    <service ref="logoutServlet" interface="javax.servlet.Servlet">
+    <service interface="javax.servlet.Servlet">
         <service-properties>
             <entry key="alias" value="/logout/local"/>
             <entry key="async-supported" value="true"/>
         </service-properties>
+        <bean class="org.codice.ddf.security.servlet.logout.LocalLogoutServlet">
+            <property name="redirectUrl" value=""/>
+        </bean>
     </service>
 
 </blueprint>
