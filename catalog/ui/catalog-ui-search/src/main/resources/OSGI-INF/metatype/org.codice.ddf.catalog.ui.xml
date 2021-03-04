@@ -329,6 +329,13 @@
             cardinality="100"
             required="false">
         </AD>
+        <AD id="logoutUrl"
+            name="Logout Url"
+            description="Url that local logout requests are sent to. Setting this to a url other than the default will causes users not not be logged out of the system. Users will instead be redirected to the provided url."
+            type="String"
+            required="false"
+            default="${org.codice.ddf.external.protocol}${org.codice.ddf.external.hostname}:${org.codice.ddf.external.port}${org.codice.ddf.external.context}/logout/?service">
+        </AD>
     </OCD>
 
     <Designate pid="org.codice.ddf.catalog.ui">

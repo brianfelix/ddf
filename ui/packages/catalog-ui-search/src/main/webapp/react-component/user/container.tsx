@@ -15,6 +15,8 @@
 import * as React from 'react'
 import UserComponent from './presentation'
 const user = require('../../component/singletons/user-instance.js')
+const properties = require('../../js/properties.js')
+import fetch from '../utils/fetch'
 
 interface State {
   username: string
@@ -31,8 +33,32 @@ class UserContainer extends React.Component<{}, State> {
       email: user.getEmail(),
     }
   }
-  signOut() {
-    window.location.href = '../../logout?service=' + window.location.href
+  signOut = async () => {
+    if (properties.logoutUrl && properties.logoutUrl != '') {
+      const res = await fetch(
+        'https://localhost:8993/logout/?service=' + window.location.href,
+        {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        }
+      )
+      if (!res.ok) {
+        console.log('!res.ok')
+        console.log(res)
+        return
+      } else {
+        console.log('res is ok!')
+        console.log(res)
+      }
+      window.location.href = properties.logoutUrl
+      //     } else {
+      //     window.location.href = '../../logout/?service=' + window.location.href
+    }
   }
   render() {
     const { username, isGuest, email } = this.state

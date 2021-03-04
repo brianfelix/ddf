@@ -178,6 +178,8 @@ public class ConfigurationApplication implements SparkApplication {
 
   private int maximumUploadSize = 1_048_576;
 
+  private String logoutUrl = "";
+
   private List<String> readOnly =
       ImmutableList.of(
           "checksum",
@@ -580,6 +582,7 @@ public class ConfigurationApplication implements SparkApplication {
     config.put("useHyphensInUuid", uuidGenerator.useHyphens());
     config.put("i18n", i18n);
     config.put("attributeSuggestionList", attributeSuggestionList);
+    config.put("logoutUrl", logoutUrl);
     return config;
   }
 
@@ -1285,5 +1288,13 @@ public class ConfigurationApplication implements SparkApplication {
 
   public void setBasicSearchMatchType(String basicSearchMatchType) {
     this.basicSearchMatchType = basicSearchMatchType;
+  }
+
+  public void setLogoutUrl(String logoutUrl) {
+    this.logoutUrl = logoutUrl;
+  }
+
+  public String getLogoutUrl() {
+    return logoutUrl;
   }
 }
